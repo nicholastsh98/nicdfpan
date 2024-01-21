@@ -4,6 +4,8 @@ The application is based on the data captured by Rohde & Schwarz's Monitoring Re
 It performs analysis, through interactive visualistions for spectrum monitoring, with an adjustable threshold to filter the various signals of interest, providing frequency and bandwidth calculation information.
 Angle of Arrival(AoA) data is also tabulated based on the various signals of interest, where the angles can be used to gauge the location of transmitter.
 
-Machine Learning is also used in the form of Density-Based Spatial Clustering of Applications with Noise (DBSCAN), effecting finding trends based on the AoA data
+Machine Learning is also used in the form of Density-Based Spatial Clustering of Applications with Noise (DBSCAN), effecting finding trends based on the AoA data.
 
-It is constructed as a Dash application, where an interactive dashboard that allows users to upload .bin or .rtr files based on recordings via the aforementioned receivers
+It is constructed as a Dash application, where an interactive dashboard that allows users to upload .bin or .rtr files based on recordings via the aforementioned receivers.
+
+It can be assessed here: https://dfpanapp.onrender.com/
