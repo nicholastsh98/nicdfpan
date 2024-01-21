@@ -508,7 +508,14 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
     #print(x)
     if updated_data is None:
         return go.Figure(),go.Figure(),None,None,None
+    first_timestamp = datetime.datetime.strptime(timestampdata[0], '%Y-%m-%d %H:%M:%S')
+    last_timestamp = datetime.datetime.strptime(timestampdata[-1], '%Y-%m-%d %H:%M:%S')
 
+    # Calculate the time difference
+    time_difference = last_timestamp - first_timestamp
+
+    # Print the total time taken (in seconds)
+    time = f"time taken: {time_difference.total_seconds()} seconds"
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=x, y=updated_data[int(selected_index)], mode='lines+markers', name='Data'))
     # fig = px.line(x=x, y=updated_data[int(selected_index)], markers=True, line_shape='linear',
