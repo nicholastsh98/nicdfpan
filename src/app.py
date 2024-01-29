@@ -75,13 +75,9 @@ app.layout = html.Div([
             'Drag and Drop or ',
             html.A('Select Files')
         ]),
-        multiple=False
+        multiple=False,
+        max_size=-1,
     ),
-    # dcc.Graph(id='abc',
-    #           figure=px.line(
-    #     x=["a", "b", "c"], y=[1, 3, 2],  # replace with your own data source
-    #     title="sample figure", height=325
-    # )),
     html.Div(id='plotdiv'),
     dcc.Graph(id='plot'),
     dcc.Graph(id='plot2'),
@@ -516,8 +512,36 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
 
     # Print the total time taken (in seconds)
     time = f"time taken: {time_difference.total_seconds()} seconds"
+    x_range = [min(x), max(x)]  # Define x-axis range
     fig = go.Figure()
+    fig.update_layout(
+        title='DFPAN Data ',
+        xaxis_title='Frequencies (MHz)',
+        yaxis_title=f'Signal Strength (db{micro_symbol})',
+        annotations=[
+            dict(
+                text=f"Timestamp: {timestampdata[int(selected_index)]}",
+                x=0.02,
+                y=1,
+                xref="paper",
+                yref="paper",
+                showarrow=False,
+                font=dict(size=10, color='red')
+            ),
+            dict(
+                text=f"Total {time}",
+                x=0.02,
+                y=0.95,
+                xref="paper",
+                yref="paper",
+                showarrow=False,
+                font=dict(size=10, color='red')
+            )
+        ]
+    )
     fig.add_trace(go.Scatter(x=x, y=updated_data[int(selected_index)], mode='lines+markers', name='Data'))
+    fig.update_xaxes(range=x_range)  # Set x-axis range for fig
+
     # fig = px.line(x=x, y=updated_data[int(selected_index)], markers=True, line_shape='linear',
     #               labels={'x': 'X-axis Label', 'y': 'Y-axis Label'})
     # fig.update_layout(title='Your Plot Title', xaxis_title='X-axis Title', yaxis_title='Y-axis Title')
@@ -622,31 +646,7 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
             signal_counter += 1
 
             #Add data for each signal to bandwidth_data
-            fig.update_layout(
-                title='DFPAN Data ',
-                xaxis_title='Frequencies (MHz)',
-                yaxis_title=f'Signal Strength (db{micro_symbol})',
-                annotations=[
-                    dict(
-                        text=f"Timestamp: {timestampdata[int(selected_index)]}",
-                        x=0.02,
-                        y=1,
-                        xref="paper",
-                        yref="paper",
-                        showarrow=False,
-                        font=dict(size=10, color='red')
-                    ),
-                    dict(
-                        text=f"Total {time}",
-                        x=0.02,
-                        y=0.95,
-                        xref="paper",
-                        yref="paper",
-                        showarrow=False,
-                        font=dict(size=10, color='red')
-                    )
-                ]
-            )
+
 
             # indexes_str = ', '.join(str(idx) for idx in signal_indexes[idx])
             bandwidth_data.append({
@@ -677,9 +677,7 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
         14: 'skyblue',
         15: 'indigo'
     }
-    x_range = [min(x), max(x)]  # Define x-axis range
 
-    fig.update_xaxes(range=x_range)  # Set x-axis range for fig
     indexes_above_threshold = [i for i, y in enumerate(updated_data[int(selected_index)]) if y > threshold]
 
     if 'show' in show_above_threshold:
