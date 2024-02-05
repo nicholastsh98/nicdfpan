@@ -9,3 +9,5 @@ Machine Learning is also used in the form of Density-Based Spatial Clustering of
 It is constructed as a Dash application, where an interactive dashboard that allows users to upload .bin or .rtr files based on recordings via the aforementioned receivers.
 
 It can be assessed here: https://dfpanapp.onrender.com/
+
+Some Recorded Data is stored in the sample recordings folder for testing and verification purposes.
