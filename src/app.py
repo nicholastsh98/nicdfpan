@@ -111,35 +111,42 @@ app.layout = html.Div([
         value=0,
         tooltip={'placement': 'bottom'}
     ),
+    html.Div(id='epsilon-container', children=[
+        html.Label('Epsilon value:'),
+        dcc.Slider(
+            id='epsilon-slider',
+            min=0,
+            max=5,
+            step=0.1,
+            value=4,
+            marks={i: str(i) for i in range(6)},
+            tooltip={'placement': 'bottom'},
 
-    html.Label('Epsilon value:'),
-    dcc.Slider(
-        id='epsilon-slider',
-        min=0,
-        max=5,
-        step=0.1,
-        value=4,
-        marks={i: str(i) for i in range(6)},
-        tooltip={'placement': 'bottom'}
-    ),
-    html.Label('Min samples:'),
-    dcc.Slider(
-        id='min-samples-slider',
-        min=0,
-        max=20,
-        value=16,
-        marks={i: str(i) for i in range(21)},
-        tooltip={'placement': 'bottom'}
-    ),
-    html.Label('Number of density groups:'),
-    dcc.Slider(
-        id='density-groups-slider',
-        min=2,
-        max=15,
-        value=5,
-        marks={i: str(i) for i in range(2, 16)},
-        tooltip={'placement': 'bottom'}
-    ),
+        )
+        ], style={'display': 'block'}),
+    html.Div(id='min-samples-container', children=[
+        html.Label('Min samples:'),
+        dcc.Slider(
+            id='min-samples-slider',
+            min=0,
+            max=20,
+            value=16,
+            marks={i: str(i) for i in range(21)},
+            tooltip={'placement': 'bottom'}
+        )
+    ], style={'display': 'block'}),
+    html.Div(id='density-slider-container', children=[
+        html.Label('Number of density groups:'),
+        dcc.Slider(
+            id='density-groups-slider',
+            min=2,
+            max=15,
+            value=5,
+            marks={i: str(i) for i in range(2, 16)},
+            tooltip={'placement': 'bottom'}
+
+        )
+        ],style={'display': 'block'}),
     dcc.Checklist(
         id='toggle-y-axis',
         options=[{'label': 'Fixed Y-Axis', 'value': 'fixed-y-axis'}],
@@ -171,7 +178,15 @@ app.layout = html.Div([
     html.Div(id='timestamp-output')
 
 ])
-
+@app.callback(
+    [Output(component_id='min-samples-container', component_property='style' ),
+     Output(component_id='density-slider-container', component_property='style'),
+     Output(component_id='epsilon-container', component_property='style')],
+    [Input(component_id= 'show-above-threshold', component_property='value')]
+)
+def update_slider_visibility(show_above_threshold):
+    display_style = {'display': 'none'} if 'show' in show_above_threshold else {'display': 'block'}
+    return display_style, display_style, display_style
 # @app.callback(Output('index-slider', 'value'),
 #               [
 #                Input('updated_data', 'max')])
