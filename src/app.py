@@ -158,6 +158,18 @@ app.layout = html.Div([
         options=[{'label': 'Show Points Above Threshold', 'value': 'show'}],
         value=[]
     ),
+    html.Div(id='AOA',children=[
+        html.H2('Machine Learning DBSCAN results'),
+        dash_table.DataTable(
+            id='AoAdata',
+            columns=[
+                {'name': 'Density Rank', 'id': 'Rank'},
+                {'name': 'Points', 'id': 'Points'},
+                {'name': 'Average Angle of Arrival', 'id': 'AAoA'}
+            ],
+            style_table={'overflowX': 'auto'},
+        )
+    ],style={'display': 'block'}),
     html.Div([
         html.H2('Identified Signal Information'),
         dash_table.DataTable(
@@ -175,18 +187,20 @@ app.layout = html.Div([
             style_table={'overflowX': 'auto'},
         )
     ]),
+
     html.Div(id='timestamp-output')
 
 ])
 @app.callback(
     [Output(component_id='min-samples-container', component_property='style' ),
      Output(component_id='density-slider-container', component_property='style'),
-     Output(component_id='epsilon-container', component_property='style')],
+     Output(component_id='epsilon-container', component_property='style'),
+    Output(component_id='AOA',component_property='style')],
     [Input(component_id= 'show-above-threshold', component_property='value')]
 )
 def update_slider_visibility(show_above_threshold):
     display_style = {'display': 'none'} if 'show' in show_above_threshold else {'display': 'block'}
-    return display_style, display_style, display_style
+    return display_style, display_style, display_style, display_style
 # @app.callback(Output('index-slider', 'value'),
 #               [
 #                Input('updated_data', 'max')])
@@ -505,7 +519,7 @@ def process_uploaded_file(decoded1):
 # Callback to process uploaded file and display result
 
 @app.callback(
-    [Output('plot', "figure"), Output('plot2', "figure"), Output('bandwidth-table', 'data'), Output('index-display', 'children'),Output('signal-alert', 'children')],
+    [Output('plot', "figure"), Output('plot2', "figure"), Output('bandwidth-table', 'data'), Output('index-display', 'children'),Output('signal-alert', 'children'),Output('AoAdata','data')],
     [Input('index-slider', 'value'), Input('threshold-slider', 'value'), Input('toggle-y-axis', 'value'),
      Input('epsilon-slider', 'value'), Input('min-samples-slider', 'value'), Input('density-groups-slider', 'value'),Input('show-above-threshold', 'value'),
      Input('x', 'data'), Input('y', 'data'), Input('min_data', 'data'), Input('max_data', 'data'),
@@ -517,8 +531,9 @@ def process_uploaded_file(decoded1):
 def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, num_density_groups,show_above_threshold,x,y,min_data,max_data,time, initial_index,text, micro_symbol,updated_data,updated_data2):
     #print(f"yaxis:{updated_data}")
     #print(x)
+    AoAdata=[]
     if updated_data is None:
-        return go.Figure(),go.Figure(),None,None,None
+        return go.Figure(),go.Figure(),None,None,None,None
     first_timestamp = datetime.datetime.strptime(timestampdata[0], '%Y-%m-%d %H:%M:%S')
     last_timestamp = datetime.datetime.strptime(timestampdata[-1], '%Y-%m-%d %H:%M:%S')
 
@@ -797,6 +812,12 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
             fig2.add_trace(px.scatter(cluster_points, x='X', y='Y').data[0])
             fig2.data[i + 1].marker.color = colors[i]
 
+            AoAdata.append({
+                'Rank': f'No {i+1}',
+                'Points': f'{average_y_values[cluster_id]:.2f}',
+                'AAoA': f'{average_y_values[cluster_id]:.2f}',
+                # Include the value from updated_data2 based on middle index
+            })
             # Label each cluster with its density ranking
             fig2.add_annotation(
                 x=cluster_points['X'].mean(),
@@ -828,7 +849,7 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
         color='info',
         dismissable=True) if count > 0 else None
 
-    return fig, fig2, bandwidth_data, index_display, alert_message
+    return fig, fig2, bandwidth_data, index_display, alert_message, AoAdata
 
 if __name__ == '__main__':
     app.run_server(debug=True)
