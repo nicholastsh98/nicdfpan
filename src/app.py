@@ -195,7 +195,7 @@ app.layout = html.Div([
     [Output(component_id='min-samples-container', component_property='style' ),
      Output(component_id='density-slider-container', component_property='style'),
      Output(component_id='epsilon-container', component_property='style'),
-    Output(component_id='AOA',component_property='style')],
+     Output(component_id='AOA', component_property='style')],
     [Input(component_id= 'show-above-threshold', component_property='value')]
 )
 def update_slider_visibility(show_above_threshold):
@@ -245,7 +245,7 @@ def process_uploaded_file(decoded1):
 
     decoded1 = base64.b64decode(content_string)
     print(type(decoded1))
-    # print(decoded1)
+    #print(decoded1)
     print(len(content_type))
     print(len(content_string))
     index = 0
@@ -814,7 +814,7 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
 
             AoAdata.append({
                 'Rank': f'No {i+1}',
-                'Points': f'{average_y_values[cluster_id]:.2f}',
+                'Points': f'{density_per_cluster[cluster_id]}',
                 'AAoA': f'{average_y_values[cluster_id]:.2f}',
                 # Include the value from updated_data2 based on middle index
             })
