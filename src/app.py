@@ -10,7 +10,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import dash
-from dash import dcc, html, dash_table
+from dash import dcc, html, dash_table , State
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 from sklearn.cluster import DBSCAN
@@ -95,14 +95,22 @@ app.layout = html.Div([
 
     dbc.Alert(id='signal-alert', color='info', dismissable=False),
     html.Div(id='index-display'),
+    html.Div(id='index-slide-id', children=[
+    dcc.Interval(id="animate", disabled=True),
+
+
     html.Label('Select Index:'),
     dcc.Slider(
         id='index-slider',
         min=0,
         max=0,
+        step=1,
         value=0,
         marks={}
     ),
+    html.Button("Play/Stop", id="play"),
+    html.Div(id='index-display-test')
+    ]),
     html.Label('Set Threshold:'),
     dcc.Slider(
         id='threshold-slider',
@@ -191,6 +199,27 @@ app.layout = html.Div([
     html.Div(id='timestamp-output')
 
 ])
+@app.callback(
+    Output('index-display-test', 'children'),
+    Output("index-slider", "value"),
+    Input('animate', 'n_intervals'),
+    State('index-slider', 'value'),
+    prevent_initial_call=True,
+)
+def update_output(n, selected_value):
+    selected_value = (n)*1
+    return 'You have selected "{}"'.format(selected_value), selected_value
+
+@app.callback(
+    Output("animate", "disabled"),
+    Input("play", "n_clicks"),
+    State("animate", "disabled"),
+)
+def toggle(n, playing):
+    if n:
+        return not playing
+    return playing
+
 @app.callback(
     [Output(component_id='min-samples-container', component_property='style' ),
      Output(component_id='density-slider-container', component_property='style'),
