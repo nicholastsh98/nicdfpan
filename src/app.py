@@ -201,13 +201,21 @@ app.layout = html.Div([
 ])
 @app.callback(
     Output('index-display-test', 'children'),
+    #Output('index-display', 'value'),
     Output("index-slider", "value"),
     Input('animate', 'n_intervals'),
+    Input('updated_data', 'data'),
     State('index-slider', 'value'),
-    prevent_initial_call=True,
+    prevent_initial_call=True
+
 )
-def update_output(n, selected_value):
-    selected_value = (n)*1
+def update_output(n,updated_data,selected_value):
+    if updated_data is None:
+        return 0,0
+    max = len(updated_data) - 1
+    if n is None:
+        return 0,0
+    selected_value = (n%max)* 1
     return 'You have selected "{}"'.format(selected_value), selected_value
 
 @app.callback(
