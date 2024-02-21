@@ -106,7 +106,8 @@ app.layout = html.Div([
         max=0,
         step=1,
         value=0,
-        marks={}
+        marks={},
+        tooltip={'placement': 'bottom','always_visible':True}
     ),
     html.Button("Play/Stop", id="play"),
     html.Div(id='index-display-test')
@@ -117,18 +118,18 @@ app.layout = html.Div([
         min=0,
         max=0,
         value=0,
-        tooltip={'placement': 'bottom'}
+        tooltip={'placement': 'bottom','always_visible':True}
     ),
     html.Div(id='epsilon-container', children=[
         html.Label('Epsilon value:'),
         dcc.Slider(
             id='epsilon-slider',
             min=0,
-            max=5,
+            max=10,
             step=0.1,
             value=4,
-            marks={i: str(i) for i in range(6)},
-            tooltip={'placement': 'bottom'},
+            marks={i: str(i) for i in range(11)},
+            tooltip={'placement': 'bottom','always_visible':True},
 
         )
         ], style={'display': 'block'}),
@@ -140,7 +141,7 @@ app.layout = html.Div([
             max=20,
             value=16,
             marks={i: str(i) for i in range(21)},
-            tooltip={'placement': 'bottom'}
+            tooltip={'placement': 'bottom','always_visible':True}
         )
     ], style={'display': 'block'}),
     html.Div(id='density-slider-container', children=[
@@ -151,7 +152,7 @@ app.layout = html.Div([
             max=15,
             value=5,
             marks={i: str(i) for i in range(2, 16)},
-            tooltip={'placement': 'bottom'}
+            tooltip={'placement': 'bottom','always_visible':True}
 
         )
         ],style={'display': 'block'}),
@@ -160,12 +161,23 @@ app.layout = html.Div([
         options=[{'label': 'Fixed Y-Axis', 'value': 'fixed-y-axis'}],
         value=['fixed-y-axis']
     ),
-    html.Label('Show Points Above Threshold Only:'),
-    dcc.Checklist(
-        id='show-above-threshold',
-        options=[{'label': 'Show Points Above Threshold', 'value': 'show'}],
-        value=[]
-    ),
+    html.Div(id='above-threshold-container', children=[
+        #html.Label('Show Points Above Threshold Only:'),
+        dcc.Checklist(
+            id='show-above-threshold',
+            options=[{'label': 'Show Points Above Threshold', 'value': 'show'}],
+            value=[]
+        ),
+    ],style={'display': 'block'}),
+    html.Div(id='ML-plot-container', children=[
+        #html.Label('Regular Plot'),
+        dcc.Checklist(
+            id='ML',
+            options=[{'label': 'DBSCAN Machine Learning Enabled (Adjustable ML Sliders)', 'value': 'show'}],
+            value=[]
+        ),
+    html.Label('Use Sliders to adjust Machine Learning Parameters')
+    ],style={'display': 'block'}),
     html.Div(id='AOA',children=[
         html.H2('Machine Learning DBSCAN results'),
         dash_table.DataTable(
@@ -173,7 +185,7 @@ app.layout = html.Div([
             columns=[
                 {'name': 'Density Rank', 'id': 'Rank'},
                 {'name': 'Points', 'id': 'Points'},
-                {'name': 'Average Angle of Arrival', 'id': 'AAoA'}
+                {'name': 'Average Angle of Arrival (\u00b0)', 'id': 'AAoA'}
             ],
             style_table={'overflowX': 'auto'},
         )
@@ -216,7 +228,7 @@ def update_output(n,updated_data,selected_value):
     if n is None:
         return 0,0
     selected_value = (n%max)* 1
-    return 'You have selected "{}"'.format(selected_value), selected_value
+    return 'You have selected "{}"\n\n'.format(selected_value), selected_value
 
 @app.callback(
     Output("animate", "disabled"),
@@ -232,12 +244,35 @@ def toggle(n, playing):
     [Output(component_id='min-samples-container', component_property='style' ),
      Output(component_id='density-slider-container', component_property='style'),
      Output(component_id='epsilon-container', component_property='style'),
-     Output(component_id='AOA', component_property='style')],
-    [Input(component_id= 'show-above-threshold', component_property='value')]
+     Output(component_id='AOA', component_property='style'),
+     Output(component_id='ML-plot-container', component_property='style')],
+    [Input(component_id= 'show-above-threshold', component_property='value')],
+    prevent_initial_call=True
 )
 def update_slider_visibility(show_above_threshold):
     display_style = {'display': 'none'} if 'show' in show_above_threshold else {'display': 'block'}
-    return display_style, display_style, display_style, display_style
+    return display_style, display_style, display_style, display_style,display_style
+
+
+@app.callback(
+    [Output(component_id='min-samples-container', component_property='style',allow_duplicate= True),
+     Output(component_id='density-slider-container', component_property='style',allow_duplicate=True),
+     Output(component_id='epsilon-container', component_property='style',allow_duplicate=True),
+
+     Output(component_id='AOA', component_property='style',allow_duplicate=True),
+     Output(component_id='above-threshold-container', component_property='style')],
+    [Input(component_id= 'ML', component_property='value')],
+    prevent_initial_call=True
+)
+def update_slider_visibility(ML):
+    display_style = {'display': 'block'},{'display': 'block'},{'display': 'block'},{'display': 'block'},{'display': 'none'}
+    display_style1 = {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {
+        'display': 'block'}
+    # display_style = {'display': 'block'} if 'show' in ML else {'display': 'none'}
+    if 'show' in ML:
+        return display_style
+    else:
+        return display_style1
 # @app.callback(Output('index-slider', 'value'),
 #               [
 #                Input('updated_data', 'max')])
@@ -269,7 +304,7 @@ def update_slider_example_max(max_data):
     return max_value
 # Function to process uploaded file
 @app.callback(
-    [Output('x', 'data'), Output('y', 'data'),Output('min_data','data'), Output('max_data','data'),
+    [Output('x', 'data'), Output('y', 'data'), Output('min_data','data'), Output('max_data','data'),
      Output('time','data'), Output('initial_index','data'), Output('text','data'), Output('micro_symbol','data'),
      Output('updated_data','data'), Output('updated_data2','data')],
 
@@ -558,14 +593,14 @@ def process_uploaded_file(decoded1):
 @app.callback(
     [Output('plot', "figure"), Output('plot2', "figure"), Output('bandwidth-table', 'data'), Output('index-display', 'children'),Output('signal-alert', 'children'),Output('AoAdata','data')],
     [Input('index-slider', 'value'), Input('threshold-slider', 'value'), Input('toggle-y-axis', 'value'),
-     Input('epsilon-slider', 'value'), Input('min-samples-slider', 'value'), Input('density-groups-slider', 'value'),Input('show-above-threshold', 'value'),
+     Input('epsilon-slider', 'value'), Input('min-samples-slider', 'value'), Input('density-groups-slider', 'value'),Input('show-above-threshold', 'value'),Input('ML', 'value'),
      Input('x', 'data'), Input('y', 'data'), Input('min_data', 'data'), Input('max_data', 'data'),
      Input('time', 'data'), Input('initial_index', 'data'), Input('text', 'data'), Input('micro_symbol', 'data'),
      Input('updated_data', 'data'), Input('updated_data2', 'data')]
 
 )
 
-def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, num_density_groups,show_above_threshold,x,y,min_data,max_data,time, initial_index,text, micro_symbol,updated_data,updated_data2):
+def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, num_density_groups,show_above_threshold,ML,x,y,min_data,max_data,time, initial_index,text, micro_symbol,updated_data,updated_data2):
     #print(f"yaxis:{updated_data}")
     #print(x)
     AoAdata=[]
@@ -584,7 +619,7 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
     fig.update_layout(
         title='DFPAN Data ',
         xaxis_title='Frequencies (MHz)',
-        yaxis_title=f'Signal Strength (db{micro_symbol})',
+        yaxis_title=f'Signal Strength (dB{micro_symbol})',
         annotations=[
             dict(
                 text=f"Timestamp: {timestampdata[int(selected_index)]}",
@@ -629,9 +664,9 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
 
     # Adding layout details
     fig2.update_layout(
-        xaxis_title='Frequency',
-        yaxis_title='Angle of Arrival',
-        title='Azimuth Level'
+        xaxis_title='Frequencies (MHz)',
+        yaxis_title='Angle of Arrival (\u00b0)',
+        title='Azimuth Angle'
     )
 
     # Highlight points above the threshold in red
@@ -722,9 +757,9 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
                 'Start Frequency': f'{start_freq:.2f} MHz',
                 'End Frequency': f'{end_freq:.2f} MHz',
                 'Center Frequency': f'{mean_freq:.2f} MHz',
-                'Median Signal Strength': middle_point if middle_point else '',
+                'Median Signal Strength': f'{middle_point} dB{micro_symbol}',
                 'Median Index': middle_point_index if middle_point_index is not None else '',
-                'Angle of Arrival': middle_point_value if middle_point_value is not None else ''
+                'Angle of Arrival': f'{middle_point_value}\u00b0 '
                 # Include the value from updated_data2 based on middle index
             })
     signal_color_map = {
@@ -746,10 +781,68 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
     }
 
     indexes_above_threshold = [i for i, y in enumerate(updated_data[int(selected_index)]) if y > threshold]
+    if 'show' in ML:
 
-    if 'show' in show_above_threshold:
+        fig2 = go.Figure()
+
+        fig2.add_trace(go.Scatter(x=x,
+                                  y=updated_data2[int(selected_index)],
+                                  mode='markers',
+                                  name='Azimuth Level'
+                                  ))
+
+        # # Adding layout details
+        # fig2.update_layout(
+        #     xaxis_title='Frequencies (MHz)',
+        #     yaxis_title='Angle of Arrival (\u00b0)',
+        #     title='Azimuth Angle'
+        # )
+        # ML
+        data = {'X': x, 'Y': updated_data2[int(selected_index)]}
+        df = pd.DataFrame(data)
+        dbscan = DBSCAN(eps=epsilon, min_samples=min_samples)
+        df['Cluster'] = dbscan.fit_predict(df[['X', 'Y']])
+
+        cluster_counts = df['Cluster'].value_counts()
+        top_clusters = cluster_counts[cluster_counts.index != -1].nlargest(num_density_groups)
+        top_points = df[df['Cluster'].isin(top_clusters.index)]
+        density_per_cluster = top_points.groupby('Cluster').size().sort_values(ascending=False)
+        colors = px.colors.qualitative.Plotly[:num_density_groups]
+        average_y_values = top_points.groupby('Cluster')['Y'].mean()
+
+        fig2 = px.scatter(df, x='X', y='Y', color='Cluster', title=f'Azimuth Angle')
+        fig2.update_traces(marker=dict(size=8, color='rgba(0, 0, 0, 0.3)'))
+        fig2.update_xaxes(title_text='Frequencies (MHz)')
+        fig2.update_yaxes(title_text='Angle of Arrival (\u00b0)')
+        fig2.update_xaxes(range=x_range)  # Set x-axis range for fig2
+
+        for i, cluster_id in enumerate(top_clusters.index):
+            cluster_points = top_points[top_points['Cluster'] == cluster_id]
+            fig2.add_trace(px.scatter(cluster_points, x='X', y='Y').data[0])
+            fig2.data[i + 1].marker.color = colors[i]
+
+            AoAdata.append({
+                'Rank': f' {i + 1}',
+                'Points': f'{density_per_cluster[cluster_id]}',
+                'AAoA': f'{average_y_values[cluster_id]:.2f}',
+                # Include the value from updated_data2 based on middle index
+            })
+            # Label each cluster with its density ranking
+            fig2.add_annotation(
+                x=cluster_points['X'].mean(),
+                y=cluster_points['Y'].max() + 0.35 * (cluster_points['Y'].max() - cluster_points['Y'].min()),
+                # Adjust the position
+                text=f"Density Rank: {i + 1}<br>Points: {density_per_cluster[cluster_id]}<br>Avg AoA: {average_y_values[cluster_id]:.2f}",
+                showarrow=False,
+                font=dict(color="black", size=10),
+                xanchor="center",
+                yanchor="bottom"
+            )
+
+
+    elif 'show' in show_above_threshold:
         # Plot points from fig1 into fig2 with updated_data2
-        # Plot points from fig1 into fig2 with updated_data2
+
         filtered_indexes_fig1 = []
         for idx in indexes_above_threshold:
             for signal in signals:
@@ -821,51 +914,11 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
 
         # Adding layout details
         fig2.update_layout(
-            xaxis_title='Frequency',
-            yaxis_title='Angle of Arrival',
-            title='Azimuth Level'
+            xaxis_title='Frequencies (MHz)',
+            yaxis_title='Angle of Arrival (\u00b0)',
+            title='Azimuth Angle'
         )
-        # ML
-        data = {'X': x, 'Y': updated_data2[int(selected_index)]}
-        df = pd.DataFrame(data)
-        dbscan = DBSCAN(eps=epsilon, min_samples=min_samples)
-        df['Cluster'] = dbscan.fit_predict(df[['X', 'Y']])
 
-        cluster_counts = df['Cluster'].value_counts()
-        top_clusters = cluster_counts[cluster_counts.index != -1].nlargest(num_density_groups)
-        top_points = df[df['Cluster'].isin(top_clusters.index)]
-        density_per_cluster = top_points.groupby('Cluster').size().sort_values(ascending=False)
-        colors = px.colors.qualitative.Plotly[:num_density_groups]
-        average_y_values = top_points.groupby('Cluster')['Y'].mean()
-
-        fig2 = px.scatter(df, x='X', y='Y', color='Cluster', title=f'Azimuth Level')
-        fig2.update_traces(marker=dict(size=8, color='rgba(0, 0, 0, 0.3)'))
-        fig2.update_xaxes(title_text='Frequency (MHz)')
-        fig2.update_yaxes(title_text='Angle of Arrival')
-        fig2.update_xaxes(range=x_range)  # Set x-axis range for fig2
-
-        for i, cluster_id in enumerate(top_clusters.index):
-            cluster_points = top_points[top_points['Cluster'] == cluster_id]
-            fig2.add_trace(px.scatter(cluster_points, x='X', y='Y').data[0])
-            fig2.data[i + 1].marker.color = colors[i]
-
-            AoAdata.append({
-                'Rank': f'No {i+1}',
-                'Points': f'{density_per_cluster[cluster_id]}',
-                'AAoA': f'{average_y_values[cluster_id]:.2f}',
-                # Include the value from updated_data2 based on middle index
-            })
-            # Label each cluster with its density ranking
-            fig2.add_annotation(
-                x=cluster_points['X'].mean(),
-                y=cluster_points['Y'].max() + 0.35 * (cluster_points['Y'].max() - cluster_points['Y'].min()),
-                # Adjust the position
-                text=f"Density Rank: {i + 1}<br>Points: {density_per_cluster[cluster_id]}<br>Avg AoA: {average_y_values[cluster_id]:.2f}",
-                showarrow=False,
-                font=dict(color="black", size=10),
-                xanchor="center",
-                yanchor="bottom"
-            )
 
     yaxis_settings = {}
     if 'fixed-y-axis' in toggle_value:
@@ -877,7 +930,8 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
         yaxis_settings['range'] = [min_data, max_data]  # Define your custom range here
 
     fig.update_layout(yaxis=yaxis_settings)
-    # fig2.update_layout(yaxis=yaxis_settings)
+
+    #fig2.update_layout(yaxis=yaxis_settings)
 
     count = len([y for y in updated_data[int(selected_index)] if y > threshold])
 
