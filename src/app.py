@@ -67,8 +67,8 @@ def EB200headerprint(datagram):
 
 
 # Define the layout of your app
-app.layout = html.Div([
-    html.H1("DFPAN Datagram Analysis"),
+app.layout = html.Div(style={'backgroundColor': 'lightgrey'}, children=[
+    html.H1("DFPAN Datagram Analysis",style={'textAlign': 'center'}),
     dcc.Upload(
         id='upload-data',
         children=html.Div([
@@ -179,7 +179,7 @@ app.layout = html.Div([
     html.Label('Use Sliders to adjust Machine Learning Parameters')
     ],style={'display': 'block'}),
     html.Div(id='AOA',children=[
-        html.H2('Machine Learning DBSCAN results'),
+        html.H2('Machine Learning DBSCAN results',style={'textAlign': 'center'}),
         dash_table.DataTable(
             id='AoAdata',
             columns=[
@@ -191,7 +191,7 @@ app.layout = html.Div([
         )
     ],style={'display': 'block'}),
     html.Div([
-        html.H2('Identified Signal Information'),
+        html.H2('Identified Signal Information',style={'textAlign': 'center'}),
         dash_table.DataTable(
             id='bandwidth-table',
             columns=[
@@ -250,8 +250,12 @@ def toggle(n, playing):
     prevent_initial_call=True
 )
 def update_slider_visibility(show_above_threshold):
-    display_style = {'display': 'none'} if 'show' in show_above_threshold else {'display': 'block'}
-    return display_style, display_style, display_style, display_style,display_style
+    display_style = {'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'}
+    display_style1 = {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'block'}
+    if 'show' in show_above_threshold:
+        return display_style
+    else:
+        return display_style1
 
 
 @app.callback(
@@ -288,7 +292,7 @@ def update_slider_example_max(updated_data):
     max_value = len(updated_data)-1
     return max_value
 @app.callback(Output('threshold-slider', 'value'),
-              [Input('min_data','data'),
+              [Input('min_data', 'data'),
                Input('max_data', 'data')])
 def update_slider_example_value(min_data,max_data):
     if min_data or max_data is not None:
