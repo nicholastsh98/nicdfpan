@@ -188,6 +188,12 @@ app.layout = html.Div(style={'backgroundColor': 'lightgrey'}, children=[
                 {'name': 'Average Angle of Arrival (\u00b0)', 'id': 'AAoA'}
             ],
             style_table={'overflowX': 'auto'},
+            style_header={
+                'text-align': 'center'  # Align column titles in the middle
+            },
+            style_data={
+                'text-align': 'center'  # Align all columns in the middle
+            },
         )
     ],style={'display': 'block'}),
     html.Div([
@@ -205,6 +211,12 @@ app.layout = html.Div(style={'backgroundColor': 'lightgrey'}, children=[
                 {'name': 'Angle of Arrival', 'id': 'Angle of Arrival'}
             ],
             style_table={'overflowX': 'auto'},
+            style_header={
+                'text-align': 'center'  # Align column titles in the middle
+            },
+            style_data={
+                'text-align': 'center'  # Align all columns in the middle
+            },
         )
     ]),
 
