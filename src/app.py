@@ -740,7 +740,7 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
 
             start_freq = signal[0]  # Start frequency of the signal
             end_freq = signal[-1]  # End frequency of the signal
-            mean_freq = sum(signal) / len(signal)  # Mean frequency of the signal
+            #mean_freq = sum(signal) / len(signal)  # Mean frequency of the signal
 
             signal_points = []
             for i, x_val in enumerate(x):
@@ -753,7 +753,7 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
                 signal_points.sort()  # Sort the points by x value
                 middle_point_index = len(signal_points) // 2  # Get the middle index
                 middle_point = signal_points[middle_point_index][1]  # Extract the y-value of the middle point
-
+                mean_freq = signal[middle_point_index]
                 # Find the index of the middle point in the entire dataset
                 middle_x_val = signal_points[middle_point_index][0]
                 middle_point_index = x.index(middle_x_val)
