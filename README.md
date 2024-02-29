@@ -10,4 +10,4 @@ It is constructed as a Dash application, where an interactive dashboard that all
 
 It can be assessed here: https://dfpanapp.onrender.com/
 
-Some Recorded Data is stored in the sample recordings folder for testing and verification purposes.
+Some Recorded Data is stored in the recordings folder for testing and vt aderification purposes.

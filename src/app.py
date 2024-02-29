@@ -98,7 +98,6 @@ app.layout = html.Div(style={'backgroundColor': 'lightgrey'}, children=[
     html.Div(id='index-slide-id', children=[
     dcc.Interval(id="animate", disabled=True),
 
-
     html.Label('Select Index:'),
     dcc.Slider(
         id='index-slider',
@@ -753,7 +752,7 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
                 signal_points.sort()  # Sort the points by x value
                 middle_point_index = len(signal_points) // 2  # Get the middle index
                 middle_point = signal_points[middle_point_index][1]  # Extract the y-value of the middle point
-                mean_freq = signal[middle_point_index]
+                center_freq = signal[middle_point_index]
                 # Find the index of the middle point in the entire dataset
                 middle_x_val = signal_points[middle_point_index][0]
                 middle_point_index = x.index(middle_x_val)
@@ -772,7 +771,7 @@ def update_plot(selected_index, threshold, toggle_value, epsilon, min_samples, n
                 'Bandwidth': f'{signal_bandwidth:.2f} MHz',
                 'Start Frequency': f'{start_freq:.2f} MHz',
                 'End Frequency': f'{end_freq:.2f} MHz',
-                'Center Frequency': f'{mean_freq:.2f} MHz',
+                'Center Frequency': f'{center_freq:.2f} MHz',
                 'Median Signal Strength': f'{middle_point} dB{micro_symbol}',
                 'Median Index': middle_point_index if middle_point_index is not None else '',
                 'Angle of Arrival': f'{middle_point_value}\u00b0 '
